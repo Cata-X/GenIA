@@ -4,7 +4,7 @@
 
 ## 1. Projecto 
 * **Contexto:** Utilizar un modelo de lenguaje pequeño de pesos abiertos (open-weight), con un máximo de 8 mil millones de parámetros, que sea capaz de realizar una tarea compleja del mundo real, pero que falle al intentar realizarla cuando se le solicita directamente mediante un prompt.
-* **Objectivo:** Definir la tarea, justificar la selección y proponer tres modelos pequeños de lenguaje de pesos abiertos que puedan resolverla.
+* **Objetivo:** Definir la tarea, justificar la selección y proponer tres modelos pequeños de lenguaje de pesos abiertos que puedan resolverla.
 ---
 
 ## 2. Integrantes del grupo
