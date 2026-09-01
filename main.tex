@@ -1,0 +1,115 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.9cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{float}
+
+\definecolor{ucblue}{RGB}{0,51,102}
+\hypersetup{colorlinks=true, urlcolor=ucblue, linkcolor=ucblue}
+
+\titleformat{\section}{\normalfont\bfseries\color{ucblue}\large}{\thesection}{0.5em}{}
+\titlespacing*{\section}{0pt}{5pt}{3pt}
+\titleformat{\subsection}{\normalfont\bfseries\small}{}{0em}{}
+\titlespacing*{\subsection}{0pt}{3pt}{2pt}
+
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=*, itemsep=1pt, topsep=1.5pt, parsep=0pt}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+{\color{ucblue}\Large\bfseries Universidad de Concepción}\\[2pt]
+{\bfseries\large Navegación espacial en grilla 2D con modelos de lenguaje pequeños}\\[2pt]
+{\small Generative Artificial Intelligence --- Deliverable 1 --- August 31st, 2026}\\[2pt]
+{\small Equipo: Catalina Alcayaga, Elizabeth Echeverría, Josefa Giusti, Cristóbal Opazo --- Grupo 2}
+\end{center}
+
+\vspace{2pt}
+\hrule
+\vspace{3pt}
+
+\begin{multicols}{2}
+
+\section*{1. Especificación de la tarea}
+Agente de navegación sobre una matriz \textbf{9$\times$9} (0=camino, 1=muro infranqueable).
+
+\textbf{Entrada:} matriz en texto, coordenadas de inicio/meta, restricción de movimiento ortogonal exclusivo.
+
+\textbf{Salida:} ruta secuencial donde cada paso declara (i) coordenada propuesta, (ii) valor real de esa coordenada en la matriz, y (iii) validación lógica de adyacencia respecto al paso anterior.
+
+\textbf{Fracaso inmediato si:} el agente pisa un muro, salta a una celda no adyacente, propone coordenadas fuera de rango, o detiene la generación antes de llegar a la meta.
+
+\section*{2. Diagnóstico de fracaso}
+El \emph{direct prompting} fracasa por limitaciones arquitectónicas en el procesamiento autorregresivo de datos espaciales sin retroalimentación visual. Al leer el laberinto como un flujo de texto unidimensional, los modelos carecen de memoria espacial y abordan cada decisión como un evento aislado en lugar de integrar su historial de ruta. Esta limitación se agrava en matrices superiores a 9$\times$9, donde la ausencia de mecanismos latentes de búsqueda con retroceso (\emph{backtracking}) provoca que el agente quede acorralado y colapse.
+
+Esta ruptura se manifiesta empíricamente de dos maneras. Por un lado, alucinaciones de estado y violaciones físicas: para forzar una salida lineal, Llama-3.1-8B-Instruct invirtió los valores de la matriz (declarando falsamente muros como celdas transitables) y confundió orientaciones espaciales básicas, mientras que Qwen2.5-1.5B-Instruct atravesó las paredes ignorando la física del mapa para mantener una secuencia numérica contigua. Por otro lado, bucles catastróficos: tal como establece la literatura~[1], el total de los fallos en navegación por coordenadas ocurre al revisitar una misma celda reiteradamente. En la evidencia recabada, AlphaMaze-v0.2-1.5B colapsó en un bucle autorregresivo infinito reescribiendo fragmentos del propio prompt, y Llama-3.1-8B-Instruct agotó su límite de generación atascado en una verificación cíclica no convergente sobre celdas bloqueadas.
+
+
+\section*{3. Modelos candidatos}
+Los tres modelos permiten estudiar dos variables: especialización en la tarea y escala general sin especialización. Se numeran para simplificar su referencia en la tabla comparativa.
+
+\begin{itemize}
+\item \textbf{Modelo 1 --- Menlo/AlphaMaze-v0.2-1.5B} (1.5B): base DeepSeek-R1-Distill-Qwen-1.5B, entrenada en dos etapas --- SFT sobre 420k laberintos resueltos (Maze-Reasoning-v0.1) y refuerzo GRPO sobre 180k muestras adicionales. Alcanza 86.0\% en MazeBench solo con SFT y 93.0\% con GRPO~[2], superando a modelos de 7B sin especialización. Representa el laberinto mediante tokens de pared por celda (no una matriz 0/1) y produce solo tokens de movimiento, por lo que requiere un adaptador de entrada/salida hacia nuestro esquema de tres campos. Aísla el efecto del entrenamiento dirigido: es el más pequeño de los tres pero el de mejor desempeño en la tarea.
+\item \textbf{Modelo 2 --- Qwen/Qwen2.5-1.5B-Instruct} (1.5B): instruct de propósito general de la familia Qwen2.5, entrenado en un corpus amplio y multilingüe, con buen seguimiento de instrucciones y salidas estructuradas (JSON, tablas) pese a su tamaño reducido. Sin entrenamiento en navegación espacial. MMLU $\approx$50\%. Al compartir tamaño con el Modelo 1, funciona como \emph{control de especialización}: si falla donde el Modelo 1 tiene éxito pese a igual escala, la diferencia es atribuible al entrenamiento dirigido.
+
+\columnbreak
+\item \textbf{Modelo 3 --- meta-llama/Llama-3.1-8B-Instruct} (8B): instruct de propósito general de Meta, ajustado con SFT y RLHF, con desempeño de referencia para su clase en razonamiento y matemática (GSM8K $\approx$76--84\%, MMLU $\approx$68--73\%, IFEval $\approx$0.79~[3]). Representa la cota superior de parámetros permitida por el proyecto; sin especialización espacial. Funciona como \emph{control de escala}: prueba si $\sim$5$\times$ más parámetros, sin entrenamiento dirigido, compensa el fallo diagnosticado en la Sección 2.
+\end{itemize}
+
+\subsection*{Tabla comparativa}
+\begin{center}
+{\fontsize{8}{9.5}\selectfont
+\begin{tabular}{@{}p{1.5cm}p{1.15cm}p{1.15cm}p{1.15cm}@{}}
+\toprule
+\textbf{Criterio} & \textbf{Modelo 1} & \textbf{Modelo 2} & \textbf{Modelo 3} \\
+\midrule
+Parámetros & 1.5B & 1.5B & 8B \\
+Rol & Candidato objetivo & Control especialización & Cota de escala \\
+MazeBench & 86--93\% & $\approx$0\%* & $\approx$0\%* \\
+MMLU & --- & $\approx$50\% & $\approx$68--73\% \\
+GSM8K & --- & --- & $\approx$76--84\% \\
+Colab T4 & Holgado & Holgado & Ajustado \\
+\bottomrule
+\end{tabular}
+}
+\end{center}
+{\small Modelo 1 = AlphaMaze-v0.2-1.5B; Modelo 2 = Qwen2.5-1.5B-Instruct; Modelo 3 = Llama-3.1-8B-Instruct. *Esperado por analogía con baselines sin entrenamiento maze-específico~[2]; no evaluado directamente por los autores.}
+
+
+
+
+\section*{4. Factibilidad de la ejecución}
+Como evidencia de la factibilidad de ejecución en el hardware disponible, la salida del comando nvidia-smi confirma que el modelo de mayor escala se ejecuta en la GPU Tesla T4 de la versión gratuita de Google Colab utilizando 9679MiB de los 15360MiB de VRAM disponibles. Esto demuestra que la configuración propuesta garantiza un margen holgado para la ejecución del entorno y confirmando que los modelos de 1.5B parámetros operan de forma limpia con un consumo aún menor. 
+A continuación se adjunta una imagen de evidencia
+
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{WhatsApp Image 2026-08-31 at 11.23.58 PM.jpeg}
+    \caption{Evidencia ejecutando los modelos}
+    \label{fig:placeholder}
+\end{figure}
+
+\section*{5. Repositorio}
+El código fuente, los datos y la documentación complementaria de este trabajo se encuentran disponibles en el siguiente repositorio: \\
+\url{https://github.com/Cata-X/GenIA}
+
+\section*{6. Referencias}
+{\small
+\begin{enumerate}[leftmargin=*, itemsep=1pt]
+\item[{[1]}] Einarsson, H. (2025). MazeEval: A Benchmark for Testing Sequential Decision-Making in Language Models. arXiv:2507.20395.
+\item[{[2]}] Menlo Research (2025). AlphaMaze: Enhancing LLMs' Spatial Intelligence via GRPO. arXiv:2502.14669.
+\item[{[3]}] Meta AI (2024). The Llama 3 Herd of Models. arXiv:2407.21783.
+\end{enumerate}
+}
+
+\end{multicols}
+
+\end{document}
