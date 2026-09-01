@@ -8,8 +8,8 @@
 ---
 
 ## 2. Integrantes del grupo
-| Name | Email | |
-| :--- | --- | -
+| Name | Email| |
+| :--- | :--- | -
 | **Elizabeth Andrea Echeverría Pinto** | eecheverria2021@udec.cl |
 | **Josefa Antonia Giusti Soto** | josesoto2022@udec.cl | 
 | **Cristobal Eduardo Opazo Abasolo** | cropazo2022@udec.cl | 
