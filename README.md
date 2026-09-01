@@ -17,7 +17,7 @@
 
 ---
 
-## 4. Repository Structure
+## 4. Estructura de repositorio
 ```text
 ├── Codigo_Modelos/     # Código fuente, scripts o modelos
 ├── Informe/            # Documento de entrega en LaTex
