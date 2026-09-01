@@ -2,22 +2,22 @@
 
 ---
 
-## 1. Project Overview & Task Description
-* **Context:** Utilizar un modelo de lenguaje pequeño de pesos abiertos (open-weight), con un máximo de 8 mil millones de parámetros, que sea capaz de realizar una tarea compleja del mundo real, pero que falle al intentar realizarla cuando se le solicita directamente mediante un prompt.
-* **Objective:** Definir la tarea, justificar la selección y proponer tres modelos pequeños de lenguaje de pesos abiertos que puedan resolverla.
+## 1. Projecto 
+* **Contexto:** Utilizar un modelo de lenguaje pequeño de pesos abiertos (open-weight), con un máximo de 8 mil millones de parámetros, que sea capaz de realizar una tarea compleja del mundo real, pero que falle al intentar realizarla cuando se le solicita directamente mediante un prompt.
+* **Objectivo:** Definir la tarea, justificar la selección y proponer tres modelos pequeños de lenguaje de pesos abiertos que puedan resolverla.
 ---
 
-## 2. Team Members & Roles
-| Name | Email / Contact | Role / Responsibilities |
+## 2. Integrantes del grupo
+| Name | Email | |
 | :--- | :--- | :--- |
-| **Elizabeth Echeverría** | correo1@ejemplo.com | Modelado de datos / Documentación |
-| **Josefa Giusti** | correo2@ejemplo.com | Desarrollo de scripts / Análisis |
-| **Cristobal Opazo** | correo3@ejemplo.com | Pruebas / Presentación final |
-| **Catalina Alcayaga** | correo3@ejemplo.com | Pruebas / Presentación final |
+| **Elizabeth Andrea Echeverría Pinto** | eecheverria2021@udec.cl |
+| **Josefa Antonia Giusti Soto** | josesoto2022@udec.cl | 
+| **Cristobal Eduardo Opazo Abasolo** | cropazo2022@udec.cl | 
+| **Catalina Andrea Alcayaga Pavez** | calcayaga2022@udec.cl | 
 
 ---
 
-## 3. State of the Work (Current Progress)
+## 3. Estado del Proyecto (Current Progress)
 
 **Current Status:** `In Progress` / `Completed` *(elegir el estado actual)*
 
