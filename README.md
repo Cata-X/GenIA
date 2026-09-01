@@ -20,5 +20,7 @@
 ## 4. Estructura de repositorio
 ```text
 ├── Codigo_Modelos/     # Código fuente, scripts o modelos
-├── Informe/            # Documento de entrega en LaTex
+├── main/               # Documento de entrega en LaTex
+├── Prompt.md/          # Instrucción/tarea entregada a los modelos
+├── Doc/                # Referencias
 └── README.md           # Descripción general del proyecto
