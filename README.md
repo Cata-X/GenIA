@@ -17,22 +17,8 @@
 
 ---
 
-## 3. Estado del Proyecto (Current Progress)
-
-**Current Status:** `In Progress` / `Completed` *(elegir el estado actual)*
-
-* **Milestones & Tasks:**
-  - [x] Definición del problema y recopilación de requerimientos
-  - [x] Estructuración del repositorio y datos iniciales
-  - [x] Desarrollo del modelo / código principal
-  - [ ] Análisis de resultados y validación
-  - [ ] Redacción de conclusiones y reporte final
-
----
-
 ## 4. Repository Structure
 ```text
-├── data/               # Archivos de datos o insumos de entrada
 ├── src/                # Código fuente, scripts o modelos
 ├── docs/               # Documentos de entrega, reportes o presentaciones
 └── README.md           # Descripción general del proyecto
