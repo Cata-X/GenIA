@@ -19,6 +19,6 @@
 
 ## 4. Repository Structure
 ```text
-├── src/                # Código fuente, scripts o modelos
-├── docs/               # Documentos de entrega, reportes o presentaciones
+├── Codigo_Modelos/     # Código fuente, scripts o modelos
+├── Informe/            # Documento de entrega en LaTex
 └── README.md           # Descripción general del proyecto
