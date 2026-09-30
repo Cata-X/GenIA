@@ -1,10 +1,4 @@
-# Entregable 2 — Navegación en grilla 9×9 con Qwen2.5-1.5B-Instruct
-
-**Curso:** Inteligencia Artificial Generativa · **Grupo 2**
-**Integrantes:** `[COMPLETAR]`
-**Video (≤ 3 min):** `[COMPLETAR: enlace abierto]`
-**Documento técnico (PDF, 1 página, LaTeX):** `[COMPLETAR: ruta en el repo, p. ej. informe/entregable2.pdf]`
-
+# Entregable 2
 ---
 
 ## 1. Qué hace este repositorio
