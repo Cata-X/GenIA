@@ -115,7 +115,7 @@ Desglose de estados finales:
 | Agente sin memoria | 0 | 0 | 0 | 0 | 20 |
 | Aleatorio | 5 | 0 | 0 | 0 | 15 |
 
-**Lectura honesta de los resultados:**
+**Lectura de los resultados:**
 
 - El agente pasa de 0/20 a 2/20. Con N = 20 esta diferencia es **pequeña y no concluyente**; no la presentamos como una mejora robusta.
 - El **control aleatorio (5/20) supera al agente (2/20)**. El aleatorio no es una política que un sistema real usaría (recorre hasta 81 pasos), pero indica que, en esta versión, el agente **no aprovecha de forma efectiva** la información que recibe.
