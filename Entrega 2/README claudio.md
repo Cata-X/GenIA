@@ -222,7 +222,7 @@ La decodificación es *greedy* y los laberintos usan semillas fijas (`2026 + id`
 ├── README.md
 ├── figuras/
 │   ├── pipeline.tex / .pdf / .png   # Diagrama del pipeline (TikZ)
-├── resultados/                  # Copiar aquí desde Drive tras correr la sección 8
+├── Resultados/                  # Copiar aquí desde Drive tras correr la sección 8
 │   ├── resultados.csv           # 1 fila por (laberinto, método)
 │   ├── salidas_crudas.jsonl     # Rutas y texto crudo del modelo por (laberinto, método)
 │   └── laberintos_9x9.json      # Los 20 laberintos con inicio y meta
