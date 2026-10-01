@@ -1,0 +1,150 @@
+\documentclass[9pt,letterpaper]{extarticle}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage[top=0.9cm,bottom=0.8cm,left=1.35cm,right=1.35cm]{geometry}
+\usepackage[protrusion=true,expansion=false]{microtype}
+\emergencystretch=1.5em
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage[colorlinks=true,urlcolor=ublue,linkcolor=ublue,citecolor=ublue]{hyperref}
+
+\definecolor{ublue}{RGB}{31,73,125}
+\definecolor{bgrey}{RGB}{235,235,235}
+\definecolor{sblue}{RGB}{222,233,247}
+\definecolor{sred}{RGB}{250,228,225}
+\definecolor{sgreen}{RGB}{226,240,226}
+
+\pagestyle{empty}
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlength{\columnseprule}{0pt}
+\raggedbottom
+\sloppy
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.6pt,topsep=1pt,parsep=0pt,partopsep=0pt}
+
+\titleformat{\section}{\bfseries\color{ublue}\normalsize}{\thesection.}{0.35em}{}
+\titlespacing*{\section}{0pt}{4.5pt}{2pt}
+
+\newcommand{\videolink}{\href{https://REEMPLAZAR-POR-ENLACE-AL-VIDEO}{\texttt{[ENLACE AL VIDEO]}}}
+
+\begin{document}
+
+\begin{center}
+  {\Large\bfseries\color{ublue} Universidad de Concepción}\\[2pt]
+  {\large\bfseries Navegación espacial en grilla 2D con modelos de lenguaje pequeños\\ \\[2pt]
+  {\small Generative Artificial Intelligence --- Deliverable 2 --- September 30th, 2026}\\[1pt]
+  {\small Equipo: Catalina Alcayaga, Elizabeth Echeverría, Josefa Giusti, Cristóbal Opazo --- Grupo 2}\\[-1pt]
+  \rule{\linewidth}{0.5pt}
+\end{center}
+\vspace{-5pt}
+
+% ---------------- PIPELINE ----------------
+\begin{center}
+\begin{tikzpicture}[
+  font=\fontsize{6.6}{7.6}\selectfont,
+  box/.style={draw,rounded corners=2pt,minimum width=2.95cm,minimum height=0.95cm,align=center,inner sep=2pt,line width=0.5pt},
+  base/.style={box,fill=bgrey},
+  sol/.style={box,fill=sblue},
+  ver/.style={box,fill=sgreen,minimum width=2.6cm,minimum height=3.0cm},
+  arr/.style={-{Stealth[length=4pt]},line width=0.55pt},
+  lab/.style={font=\fontsize{6}{7}\selectfont\itshape,align=center,inner sep=1pt}
+]
+% fila baseline
+\node[align=left,font=\fontsize{6.8}{8}\selectfont\bfseries\color{black!70}] (bl) at (1.45,1.95) {Baseline\\[-1pt]\normalfont\itshape(direct prompting,\\ prompt de D1)};
+\node[base] (b1) at (5.0,1.95) {\textbf{Prompt D1}\\matriz + inicio/meta};
+\node[base] (b2) at (8.5,1.95) {\textbf{Qwen2.5-1.5B}\\ruta completa, 1 pasada};
+\node[base] (b3) at (12.0,1.95) {\textbf{Parser}\\coordenadas $\rightarrow$ ruta};
+% fila solucion
+\node[align=left,font=\fontsize{6.8}{8}\selectfont\bfseries\color{ublue}] (sl) at (1.45,0.85) {Solución: agente paso a paso};
+\node[sol] (e) at (1.45,0) {\textbf{Entorno Python}\\(memoria y herramienta)\\posición, meta, historial,\\celdas visitadas};
+\node[sol] (p) at (5.0,0) {\textbf{Prompt del paso}\\mapa + 4 vecinos con\\valor real y marca\\«ya visitada»};
+\node[sol] (q) at (8.5,0) {\textbf{Qwen2.5-1.5B}\\1 línea: Meta hacia $|$ Elijo\\$|$ (f,c) $|$ valor $|$ adyacente};
+\node[sol] (v) at (12.0,0) {\textbf{Validador}\\¿muro? ¿fuera del mapa?\\¿celda no adyacente?};
+\node[ver] (vf) at (15.75,0.95) {\textbf{Verificador D1}\\(mismo código para\\todos los métodos)\\[2pt]éxito\\pisa muro\\salto no adyacente\\fuera de rango\\no llega a la meta};
+\draw[arr] (b1)--(b2); \draw[arr] (b2)--(b3);
+\draw[arr] (b3.east)--(b3.east-|vf.west);
+\draw[arr] (e)--(p); \draw[arr] (p)--(q); \draw[arr] (q)--(v);
+\draw[arr] (v.east)--(v.east-|vf.west);
+% rechazo
+\draw[arr,red!60!black] ([xshift=-0.5cm]v.south) -- ++(0,-0.52) -| (p.south);
+\node[lab,red!60!black] at (8.25,-0.80) {rechazo: re-prompt «RECHAZADA» (hasta 3 reintentos)};
+% ok
+\draw[arr,green!40!black] ([xshift=0.5cm]v.south) -- ++(0,-1.05) -| (e.south);
+\node[lab,green!40!black,fill=white] at (7.3,-1.36) {movimiento válido: se mueve y se registra en historial y visitadas};
+\end{tikzpicture}\\[1pt]
+{\footnotesize Figura 1: Pipeline. El baseline genera la ruta completa de una vez; el agente decide un movimiento por paso y el entorno valida y recuerda. Ambos se miden con el mismo verificador. D1 = Deliverable 1.}
+\end{center}
+\vspace{-4pt}
+
+\begin{multicols}{2}
+\raggedcolumns
+
+\section{Continuidad con el Deliverable 1}
+\textbf{Misma tarea, mismo fallo, mismo criterio.} Navegación en matriz $9\times9$ (0=camino, 1=muro), movimiento ortogonal. Un resultado es correcto si no pisa un muro, no salta a una celda no adyacente, no sale del rango y llega a la meta (mismo verificador para todos los métodos). Fallo atacado: en una sola pasada el modelo atraviesa muros y no integra su historial de ruta, lo que deriva en revisitas y bucles [1].
+\textbf{Desviaciones declaradas.} (a) Se evalúa sobre $N=20$ laberintos $9\times9$ (D1 tenía uno): el \#0 es el de D1 y los otros 19 salen de semillas fijas 2027--2045 (laberinto perfecto con 3 muros abiertos). (b) El entorno entrega al modelo el valor real de las 4 celdas vecinas, ayuda que el baseline no tiene (el mapa completo sigue en el prompt). (c) El campo (iii) de D1 queda como plantilla «adyacente: sí», porque el entorno garantiza la adyacencia; los campos (i) y (ii) sí se contrastan con la matriz.
+
+\section{Modelo seleccionado}
+El modelos seleccionado es \textbf{Qwen/Qwen2.5-1.5B-Instruct}, revisión
+{\texttt{\fontsize{6}{7}\selectfont 989aa7980e4cf806f80c7fef2b1adb7bc71aa306}},
+fp16, decodificación greedy, sin fine-tuning, Colab T4. 
+\\Se descarta \textit{Llama-3.1-8B-Instruct} por economía de parámetros ($\approx$5$\times$ más): se prioriza resolver el fallo con un algoritmo y no con escala de cómputo. Se descarta \textit{AlphaMaze-v0.2-1.5B} [2] porque al estar entrenado en resolución de laberintos, se reduciría la complejidad del problema a adaptar el formato de salida, no a mejorar la navegación.
+\section{Intervención: agente paso a paso}
+Sin reentrenar, con uso de herramienta en Python (Fig.~1).
+\textbf{Pasos: }(1) El modelo decide solo el siguiente movimiento, no la ruta completa: ataca las violaciones de la física del mapa. (2) El entorno es la memoria de trabajo que falta: historial y celdas visitadas, marcadas «ya visitada» en cada prompt: ataca los bucles. (3) El validador rechaza muros y bordes y reenvía el prompt con esa opción marcada «RECHAZADA» (hasta 3 reintentos); ante un callejón sin salida el prompt indica retroceder. Termina en la meta, a los 81 pasos o tras 4 rechazos seguidos.
+
+\section{Estrategias alternativas evaluadas}
+\textbf{Prompt (3 laberintos).} v1, pedir la coordenada siguiente: copiaba su posición (3/3). v2, opciones A--D: sesgo hacia C y bucles. v3, v2 más dirección de la meta: el sesgo persistió. v4, v3 más razonamiento breve: identifica la dirección de la meta (3/3) pero no la traduce a la letra. \textbf{v5 (final):} elegir el movimiento por su nombre. \textbf{Ablación:} el agente sin historial ni marcas de visitada. \textbf{Control:} política aleatoria en el mismo entorno (solo celdas libres, 81 pasos).
+
+\section{Resultados (mismas 20 entradas y mismo criterio)}
+
+\begin{center}
+\setlength{\tabcolsep}{2.6pt}\renewcommand{\arraystretch}{1.05}
+{\fontsize{7.4}{8.6}\selectfont
+\begin{tabular}{@{}lccccrr@{}}
+\toprule
+Método & Éxito & Estricto$^*$ & Muro/salto & Bucle & Rech.$^{**}$ & t (s)\\
+\midrule
+Baseline (direct)   & 0/20 & 0/20 & 14\,/\,6 & --   & --    & 37\\
+Agente paso a paso  & 2/20 & 0/20 & 0$^{***}$   & 1    & 17    & 28\\
+Agente sin memoria  & 0/20 & 0/20 & 0$^{***}$   & 20   & 0     & 154\\
+Aleatorio (control) & 5/20 & 5/20 & 0$^{***}$   & 15   & 0     & 0\\
+\bottomrule
+\end{tabular}}\\[2pt]
+{\fontsize{6.4}{7.2}\selectfont $^*$Éxito sin ninguna propuesta rechazada. $^{**}$Corridas que terminan por 4 rechazos seguidos. $^{***}$Cero por construcción: el entorno bloquea esos movimientos. Bucle: 81 pasos sin llegar a la meta.}
+\end{center}
+\vspace{-3pt}
+\begin{itemize}
+\item \textbf{Violaciones físicas:} el baseline falla por ellas en 20/20. Con el agente desaparecen, pero por construcción: el modelo propuso en promedio 10.2 movimientos inválidos por laberinto y ninguna corrida terminó sin rechazos (estricto 0/20).
+\item \textbf{Bucles:} la memoria los baja de 20/20 a 1/20 (Fisher $p<10^{-9}$). No se afirma que los elimine: 17 de 20 corridas terminan antes (10.4 pasos en promedio) por rechazos agotados.
+\item \textbf{Éxito:} 2/20 frente a 0/20 del baseline ($p=0.49$; IC95\% Wilson 3--30\%) no es concluyente y queda bajo el control aleatorio (5/20).
+\end{itemize}
+
+\section{Límites y caso de fallo}
+\textbf{Laberinto 1} (semilla 2027, inicio (0,8), meta (8,5), óptimo 11). El agente llega a (2,8) y emite 4 veces seguidas «Derecha $|$ (2,7)». La coordenada escrita es la celda libre de la \textit{izquierda}: el modelo ubica bien la celda pero la nombra con la dirección equivocada, y como la decisión se toma por el nombre, «Derecha» en la columna 8 cae fuera del mapa. Con decodificación greedy y un prompt que solo añade la marca «RECHAZADA», la misma entrada da la misma salida: el reintento no aporta información nueva y la corrida termina en 2 pasos (el laberinto 3 agota los 81 pasos). En la demostración (semilla 55409) el modelo repite «Derecha» en 6 celdas consecutivas de la columna 8, aunque el prompt la lista como «fuera del mapa». Es el modo dominante (17/20): el modelo de 1.5B no mapea de forma fiable nombres de dirección a geometría de grilla, y el entorno detecta el error pero no lo corrige.
+
+\section{Repositorio y reproducibilidad}
+\begin{itemize}
+    \item Código, laberintos, resultados y README:
+    \href{https://github.com/Catalina1804/GenIA/tree/Catalina1804-Entregable-2/Entrega%202}{Github}
+%\url{https://github.com/Catalina1804/GenIA/tree/Catalina1804-Entregable-2/Entrega%202}.
+    %\item Notebook \texttt{Entregable2\_GenAI.ipynb}, ejecutable completo en Colab T4.
+    \item Video (3 min): \href{https://drive.google.com/file/d/1oVTMHAElZMPyWEV_M8jcvtlFwwYAwI8C/view?usp=sharing}{Enlace Video}.
+\end{itemize}
+  
+
+\section{Referencias}
+{\fontsize{6.9}{7.8}\selectfont
+[1] Einarsson, H. (2025). MazeEval: A Benchmark for Testing Sequential Decision-Making in Language Models. arXiv:2507.20395.\par
+[2] Menlo Research (2025). AlphaMaze: Enhancing LLMs' Spatial Intelligence via GRPO. arXiv:2502.14669.}
+
+\end{multicols}
+\end{document}
