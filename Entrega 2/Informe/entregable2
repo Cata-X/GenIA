@@ -93,7 +93,7 @@
 \textbf{Desviaciones declaradas.} (a) Se evalúa sobre $N=20$ laberintos $9\times9$ (D1 tenía uno): el \#0 es el de D1 y los otros 19 salen de semillas fijas 2027--2045 (laberinto perfecto con 3 muros abiertos). (b) El entorno entrega al modelo el valor real de las 4 celdas vecinas, ayuda que el baseline no tiene (el mapa completo sigue en el prompt). (c) El campo (iii) de D1 queda como plantilla «adyacente: sí», porque el entorno garantiza la adyacencia; los campos (i) y (ii) sí se contrastan con la matriz.
 
 \section{Modelo seleccionado}
-El modelos seleccionado es \textbf{Qwen/Qwen2.5-1.5B-Instruct}, revisión
+El modelo seleccionado es \textbf{Qwen/Qwen2.5-1.5B-Instruct}, revisión
 {\texttt{\fontsize{6}{7}\selectfont 989aa7980e4cf806f80c7fef2b1adb7bc71aa306}},
 fp16, decodificación greedy, sin fine-tuning, Colab T4. 
 \\Se descarta \textit{Llama-3.1-8B-Instruct} por economía de parámetros ($\approx$5$\times$ más): se prioriza resolver el fallo con un algoritmo y no con escala de cómputo. Se descarta \textit{AlphaMaze-v0.2-1.5B} [2] porque al estar entrenado en resolución de laberintos, se reduciría la complejidad del problema a adaptar el formato de salida, no a mejorar la navegación.
