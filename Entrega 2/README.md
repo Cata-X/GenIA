@@ -210,7 +210,7 @@ La decodificación es *greedy* y los laberintos usan semillas fijas (`2026 + id`
 
 ---
 
-## 9. Qué se muestra en el video
+## 9. Video
 
 1. Celda de carga del modelo (nombre, revisión y GPU impresos).
 2. Sección 11: laberinto con semilla aleatoria impresa → **baseline** y **agente** sobre la misma entrada, con el veredicto del verificador para cada uno.
