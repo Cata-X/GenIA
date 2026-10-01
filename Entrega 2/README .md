@@ -224,7 +224,7 @@ La decodificación es *greedy* y los laberintos usan semillas fijas (`2026 + id`
 │   ├── resultados.csv           # 1 fila por (laberinto, método)
 │   ├── salidas_crudas.jsonl     # Rutas y texto crudo del modelo por (laberinto, método)
 │   └── laberintos_9x9.json      # Los 20 laberintos con inicio y meta
-└── informe/
+└── Informe/
     └── entregable2.pdf          # PDF de 1 página compilado desde LaTeX (+ .tex)
 ```
 
