@@ -1,11 +1,4 @@
-# Entregable 2 — Navegación en grilla 9×9 con Qwen2.5-1.5B-Instruct
-
-**Universidad de Concepción · Generative Artificial Intelligence · Grupo 2**
-**Integrantes:** Catalina Alcayaga, Elizabeth Echeverría, Josefa Giusti, Cristóbal Opazo
-**Repositorio:** https://github.com/Catalina1804/GenIA/tree/Catalina1804-Entregable-2/Entrega%202
-**Video (≤ 3 min):** https://drive.google.com/file/d/1oVTMHAElZMPyWEV_M8jcvtlFwwYAwI8C/view?usp=sharing
-**Documento técnico (PDF, 1 página, LaTeX):** `[COMPLETAR: ruta en el repo, p. ej. informe/entregable2.pdf]`
-
+# Entregable 2
 ---
 
 ## 1. Qué hace este repositorio
@@ -139,7 +132,7 @@ Desglose de estados finales:
 | Agente sin memoria | 0 | 0 | 0 | 0 | 20 |
 | Aleatorio | 5 | 0 | 0 | 0 | 15 |
 
-**Lectura honesta de los resultados:**
+**Lectura de los resultados:**
 
 - El **control aleatorio (5/20) supera al agente (2/20)**. El aleatorio no es una política que un sistema real usaría (recorre hasta 81 pasos), pero indica que, en esta versión, el agente **no aprovecha de forma efectiva** la información que recibe.
 - **Violaciones físicas (muros y saltos):** el baseline falla por ellas en 20/20. En el agente aparecen como 0, pero **por construcción** (el entorno bloquea esos movimientos), no porque el modelo las haya dejado de proponer: propuso en promedio 10.2 movimientos inválidos por laberinto y ninguna corrida terminó sin rechazos (estricto 0/20). Los ceros de las columnas `pisa_muro`/`salto_no_adyacente` del agente, de la ablación y del aleatorio no son evidencia de mejora.
@@ -227,7 +220,7 @@ La decodificación es *greedy* y los laberintos usan semillas fijas (`2026 + id`
 ├── README.md
 ├── figuras/
 │   ├── pipeline.tex / .pdf / .png   # Diagrama del pipeline (TikZ)
-├── resultados/                  # Copiar aquí desde Drive tras correr la sección 8
+├── Resultados/                  # Copiar aquí desde Drive tras correr la sección 8
 │   ├── resultados.csv           # 1 fila por (laberinto, método)
 │   ├── salidas_crudas.jsonl     # Rutas y texto crudo del modelo por (laberinto, método)
 │   └── laberintos_9x9.json      # Los 20 laberintos con inicio y meta
