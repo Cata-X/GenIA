@@ -1,0 +1,44 @@
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{xcolor}
+\usetikzlibrary{arrows.meta,calc}
+\definecolor{bgrey}{HTML}{ECECEC}
+\definecolor{sblue}{HTML}{DCE9F8}
+\definecolor{sgreen}{HTML}{DDF0DD}
+\definecolor{ublue}{HTML}{1F4E9C}
+\begin{document}
+\begin{tikzpicture}[
+  font=\fontsize{6.6}{7.6}\selectfont,
+  box/.style={draw,rounded corners=2pt,minimum width=2.95cm,minimum height=0.95cm,align=center,inner sep=2pt,line width=0.5pt},
+  base/.style={box,fill=bgrey},
+  sol/.style={box,fill=sblue},
+  ver/.style={box,fill=sgreen,minimum width=2.6cm,minimum height=3.0cm},
+  arr/.style={-{Stealth[length=4pt]},line width=0.55pt},
+  lab/.style={font=\fontsize{6}{7}\selectfont\itshape,align=center,inner sep=1pt}
+]
+% fila baseline
+\node[align=left,font=\fontsize{6.8}{8}\selectfont\bfseries\color{black!70}] (bl) at (1.45,1.95) {Baseline\\[-1pt]\normalfont\itshape(direct prompting,\\ prompt de D1)};
+\node[base] (b1) at (5.0,1.95) {\textbf{Prompt D1}\\matriz + inicio/meta};
+\node[base] (b2) at (8.5,1.95) {\textbf{Qwen2.5-1.5B}\\ruta completa, 1 pasada};
+\node[base] (b3) at (12.0,1.95) {\textbf{Parser}\\coordenadas $\rightarrow$ ruta};
+% fila solucion
+\node[align=left,font=\fontsize{6.8}{8}\selectfont\bfseries\color{ublue}] (sl) at (1.45,0.85) {Solución: agente paso a paso};
+\node[sol] (e) at (1.45,0) {\textbf{Entorno Python}\\(memoria y herramienta)\\posición, meta, historial,\\celdas visitadas};
+\node[sol] (p) at (5.0,0) {\textbf{Prompt del paso}\\mapa + 4 vecinos con\\valor real y marca\\«ya visitada»};
+\node[sol] (q) at (8.5,0) {\textbf{Qwen2.5-1.5B}\\1 línea: Meta hacia $|$ Elijo\\$|$ (f,c) $|$ valor $|$ adyacente};
+\node[sol] (v) at (12.0,0) {\textbf{Validador}\\¿muro? ¿fuera del mapa?\\¿celda no adyacente?};
+\node[ver] (vf) at (15.75,0.95) {\textbf{Verificador D1}\\(mismo código para\\todos los métodos)\\[2pt]éxito\\pisa muro\\salto no adyacente\\fuera de rango\\no llega a la meta};
+\draw[arr] (b1)--(b2); \draw[arr] (b2)--(b3);
+\draw[arr] (b3.east)--(b3.east-|vf.west);
+\draw[arr] (e)--(p); \draw[arr] (p)--(q); \draw[arr] (q)--(v);
+\draw[arr] (v.east)--(v.east-|vf.west);
+% rechazo
+\draw[arr,red!60!black] ([xshift=-0.5cm]v.south) -- ++(0,-0.52) -| (p.south);
+\node[lab,red!60!black] at (8.25,-0.80) {rechazo: re-prompt «RECHAZADA» (hasta 3 reintentos)};
+% ok
+\draw[arr,green!40!black] ([xshift=0.5cm]v.south) -- ++(0,-1.05) -| (e.south);
+\node[lab,green!40!black,fill=white] at (7.3,-1.36) {movimiento válido: se mueve y se registra en historial y visitadas};
+\end{tikzpicture}
+\end{document}
