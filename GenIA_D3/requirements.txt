@@ -1,7 +1,0 @@
-# Colab ya trae torch (con CUDA). Si lo instalas en otra maquina: pip install torch
-transformers>=4.44
-accelerate>=0.33
-huggingface_hub
-pandas
-scipy
-pytest
