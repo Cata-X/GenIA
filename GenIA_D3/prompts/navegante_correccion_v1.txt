@@ -1,0 +1,5 @@
+<correccion>
+El Crítico revisó tu propuesta anterior y concluyó: {motivo}
+Hechos verificados del entorno: {hechos_libres}
+Elige otro movimiento usando solo una celda libre de "Movimientos posibles".
+</correccion>
