@@ -1,0 +1,153 @@
+\documentclass[9pt,letterpaper]{extarticle}
+\usepackage[top=2.28cm,bottom=0.8cm,left=1.35cm,right=1.35cm]{geometry}
+\usepackage{estilo_gai}
+\begin{document}
+\gaiheader{Sistema multiagente para navegación en grilla 9$\times$9\\ Navegante $\cdot$ Crítico-Corrector $\cdot$ Árbitro sobre Qwen2.5-1.5B}
+  {Catalina Alcayaga, Elizabeth Echeverría, Josefa Giusti, Cristóbal Opazo\hspace{0.5em}$\cdot$\hspace{0.5em}Grupo 2}
+  {Deliverable 3}{31 de octubre de 2026}
+\gaifooter{Deliverable 3}
+
+% ---------------- Figura 1: grafo de agentes ----------------
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\fontsize{6.4}{7.4}\selectfont,
+  box/.style={draw,rounded corners=2.5pt,minimum height=0.85cm,align=center,inner sep=2pt,line width=0.6pt},
+  base/.style={box,fill=slatet,draw=slate!70},
+  tool/.style={box,fill=white,draw=slate,dashed},
+  ag/.style={box,fill=sky,draw=acc,line width=0.9pt},
+  stopn/.style={box,fill=white,draw=pri,line width=1.1pt},
+  arr/.style={-{Stealth[length=4pt]},line width=0.6pt,color=pri!85},
+  rej/.style={-{Stealth[length=4pt]},line width=0.8pt,color=badc},
+  okk/.style={-{Stealth[length=4pt]},line width=0.8pt,color=okc},
+  lb/.style={font=\fontsize{5.9}{6.6}\selectfont,fill=white,inner sep=0.6pt,align=center}]
+ \node[base,minimum width=2.0cm] (ent) at (1.0,3.3) {Laberinto 9$\times$9\\[-1pt]{\fontsize{5.9}{6.6}\selectfont posición $\cdot$ meta}};
+ \node[tool,minimum width=2.1cm] (obs) at (4.15,3.3) {\textbf{observar()}\\[-1pt]{\fontsize{5.9}{6.6}\selectfont 4 vecinos y su valor}};
+ \node[ag,minimum width=2.4cm] (nav) at (7.6,3.3) {\textbf{Navegante}\\[-1pt]{\fontsize{5.9}{6.6}\selectfont $k=3$ candidatos, $T=0{,}7$}};
+ \node[ag,minimum width=3.3cm] (cri) at (12.3,3.3) {\textbf{Crítico-Corrector}\\[-1pt]{\fontsize{5.9}{6.6}\selectfont APRUEBO $\cdot$ CORRIJO $\cdot$ RECHAZO}};
+ \node[ag,minimum width=2.4cm] (arb) at (16.8,3.3) {\textbf{Árbitro}\\[-1pt]{\fontsize{5.9}{6.6}\selectfont ELIJO: movimiento}};
+ \node[tool,minimum width=3.6cm] (val) at (12.3,4.9) {\textbf{validar()}\\[-1pt]{\fontsize{5.9}{6.6}\selectfont muro $\cdot$ borde $\cdot$ adyacencia $\cdot$ nombre = celda}};
+ \node[tool,minimum width=2.4cm] (mov) at (14.3,0.85) {\textbf{mover()}\\[-1pt]{\fontsize{5.9}{6.6}\selectfont único que avanza}};
+ \node[tool,minimum width=2.4cm] (mem) at (7.6,0.85) {\textbf{memoria()}\\[-1pt]{\fontsize{5.9}{6.6}\selectfont visitadas $\cdot$ ruta}};
+ \node[stopn,text width=2.0cm] (fn) at (17.6,0.85) {\textbf{Fin}\\[-1pt]{\fontsize{5.9}{6.6}\selectfont meta, 81 pasos o 4 rondas vacías}};
+ % aristas fila superior
+ \draw[arr] (ent) -- node[lb,above=1pt]{mapa} (obs);
+ \draw[arr] (obs) -- node[lb,above=1pt]{vecinos} (nav);
+ \draw[arr] (nav) -- node[lb,above=1pt]{3 candidatos} (cri);
+ \draw[arr] (cri) -- node[lb,above=1pt]{$\geq$2 válidos\\[-1pt]distintos} (arb);
+ \draw[arr] ([xshift=-0.5cm]cri.north) -- node[lb,left=1pt]{candidato} ([xshift=-0.5cm]val.south);
+ \draw[arr] ([xshift=0.5cm]val.south) -- node[lb,right=1pt]{hechos} ([xshift=0.5cm]cri.north);
+ % válidos hacia mover
+ \draw[okk] ([xshift=0.9cm]cri.south) -- ++(0,-0.7) -| ([xshift=-0.55cm]mov.north);
+ \node[lb,text=okc!60!black] at (13.2,2.12) {1 válido};
+ \draw[okk] (arb.south) -- ++(0,-0.7) -| ([xshift=0.55cm]mov.north);
+ \node[lb,text=okc!60!black] at (15.95,2.12) {ELIJO};
+ % bucle de reintento (morado)
+ \draw[rej] ([xshift=-0.9cm]cri.south) -- ++(0,-0.7) -| ([xshift=0.45cm]nav.south);
+ \node[lb,text=badx] at (9.95,2.12) {0 válidos: reintento\\[-1pt]con el hecho corregido};
+ % memoria y fin
+ \draw[arr] (mov.west) -- node[lb,above=1pt]{paso confirmado} (mem.east);
+ \draw[arr] ([xshift=-0.45cm]mem.north) -- node[lb,left=1pt]{visitadas} ([xshift=-0.45cm]nav.south);
+ \draw[arr] (mov.east) -- (fn.west);
+\end{tikzpicture}\\[2pt]
+{\footnotesize\textbf{\color{pri}Figura 1.} Grafo del sistema: 3 agentes (relleno; mismo modelo, un prompt cada uno), 4 herramientas (punteado; son código) y 2 bucles: reintento (morado) y avance (verde). Ninguna herramienta calcula la ruta.}
+\end{center}
+\vspace{-9pt}
+
+\begin{multicols}{2}
+\raggedcolumns
+
+\section{Continuidad con el D1 y el D2}
+Misma tarea, mismas \num{20} grillas, mismo verificador \code{evaluar\_ruta} y mismo modelo (\code{Qwen2.5-1.5B-Instruct}, revisión \code{989aa798}). Cada paso conserva los tres campos del D1; ahora \code{validar()} comprueba la adyacencia, que en el D2 era plantilla. Punto de partida (D2): baseline \textcolor{badx}{\textbf{0/20}}, agente \num{2/20}, aleatorio \num{5/20}. Fallo dominante: dice una dirección y escribe la coordenada de otra (\num{17/20}); el reintento \emph{greedy} repite el error.
+
+\section{Diseño de los agentes}
+\begin{center}
+\setlength{\tabcolsep}{2pt}\renewcommand{\arraystretch}{1.12}
+{\fontsize{6.7}{7.6}\selectfont
+\arrayrulecolor{pri}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.35cm}>{\raggedright\arraybackslash}p{3.45cm}>{\raggedright\arraybackslash}p{3.15cm}@{}}
+\toprule
+\rowcolor{pri}\thc{Agente} & \thc{Recibe $\to$ devuelve} & \thc{Traspasa o se detiene}\\
+\midrule
+\textbf{Navegante} & Mapa, posición, meta, vecinos, visitadas $\to$ \textit{Elijo: Derecha | (4, 5) | valor: 0} ($k=3$) & Candidatos únicos con sus votos al Crítico.\\
+\midrule
+\textbf{Crítico-Corrector} & Candidato + hechos de \code{validar()} $\to$ \textit{APRUEBO}, \textit{CORRIJO: Izquierda} o \textit{RECHAZO: motivo} & 1 válido $\to$ \code{mover()}; $\geq$2 $\to$ Árbitro; 0 $\to$ Navegante con el hecho corregido.\\
+\midrule
+\textbf{Árbitro} & Válidos + posición, meta, visitadas $\to$ \textit{ELIJO: movimiento} & Entrega a \code{mover()}.\\
+\bottomrule
+\end{tabular}}\\[1pt]
+{\fontsize{6.4}{7.2}\selectfont Un \code{prompts/*\_v1.txt} por agente, fuera del código. La corrida termina tras 4 rondas seguidas sin candidato válido.}
+\end{center}
+
+\section{Técnicas, falla que atacan y ablación}
+\begin{center}
+\setlength{\tabcolsep}{2pt}\renewcommand{\arraystretch}{1.12}
+{\fontsize{6.7}{7.6}\selectfont
+\arrayrulecolor{pri}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.45cm}>{\raggedright\arraybackslash}p{2.45cm}>{\raggedright\arraybackslash}p{2.7cm}@{}}
+\toprule
+\rowcolor{pri}\thc{Técnica (Clase 5)} & \thc{Falla D1/D2} & \thc{Se apaga}\\
+\midrule
+Rol, \emph{few-shot}, XML (Navegante) & Nombre $\neq$ coordenada & \code{sin\_fewshot}\\
+\emph{Select}: \code{observar()} & Lee mal la matriz & \code{sin\_observar}\\
+\emph{Self-consistency} $k=3$ [1] & Muestra única frágil & \code{sin\_selfconsistency}\\
+\emph{Self-Refine} con hechos [2] & Reintento idéntico & \code{sin\_critico}\\
+Decisión entre válidos & Opciones sin criterio & \code{sin\_arbitro}\\
+\bottomrule
+\end{tabular}}\\[1pt]
+{\fontsize{6.4}{7.2}\selectfont \emph{Write} (\code{memoria()}) e \emph{isolate} (cada agente ve solo su contexto) están en todas las variantes.}
+\end{center}
+
+\section{Desviaciones declaradas}
+\begin{callout}{war}
+\textbf{\color{warc!85!black}Cambios frente al D2.} (i) $T=0{,}7$ y $k=3$ en vez de \emph{greedy}, necesario para \emph{self-consistency}; semilla fija por (laberinto, paso, ronda); \code{repetition\_penalty}=1,1 se mantiene. (ii) El Estratega se descartó; el Árbitro ataca el fallo dominante. (iii) Los inválidos se cuentan por muestra: no son comparables con las 10,2 propuestas por laberinto del D2. (iv) Todas las corridas usan prompts \code{\_v1}.
+\end{callout}
+
+\columnbreak
+
+\section{Resultados (\num{N=20}, mismo verificador)}
+\begin{center}
+\setlength{\tabcolsep}{2.3pt}\renewcommand{\arraystretch}{1.12}
+{\fontsize{7}{8}\selectfont
+\arrayrulecolor{pri}
+\begin{tabular}{@{}lcccc c@{}}
+\toprule
+\rowcolor{pri}\thc{Método} & \thc{Éxito} & \thc{IC 95 \%} & \thc{$\Delta$} & \thc{Estr.$^\dagger$} & \thc{t (s)}\\
+\midrule
+Aleatorio & \num{5/20} & 11--47 & -- & 5 & --\\
+Baseline & \textcolor{badx}{0/20} & 0--16 & -- & 0 & 37\\
+Agente D2 & 2/20 & 3--30 & -- & 0 & 29\\
+\rowcolor{sky}\textbf{Sistema completo} & \textbf{2/20} & \textbf{3--30} & -- & \textbf{1} & \textbf{140}\\
+\midrule
+\hspace{0.6em}sin \emph{few-shot} & 2/20 & 3--30 & 0 & 0 & 234\\
+\hspace{0.6em}sin \code{observar} & \textcolor{badx}{0/20} & 0--16 & $-2$ & 0 & 110\\
+\hspace{0.6em}sin \emph{self-consist.} & 1/20 & 1--24 & $-1$ & 0 & 38\\
+\hspace{0.6em}sin Crítico & 2/20 & 3--30 & 0 & 1 & 53\\
+\hspace{0.6em}sin Árbitro & 2/20 & 3--30 & 0 & 1 & 174\\
+\hspace{0.6em}Árbitro por regla$^\ddagger$ & 1/20 & 1--24 & $-1$ & 1 & 110\\
+\bottomrule
+\end{tabular}}\\[1pt]
+{\fontsize{6.4}{7.2}\selectfont $\Delta$: éxitos frente al completo. IC de Wilson. t: promedio por laberinto. $^\dagger$Sin ronda vacía; no comparable con el estricto del D2. $^\ddagger$Criterio del Árbitro escrito en código.}
+\end{center}
+\begin{itemize}
+\item \textbf{\color{badx}Sin mejora de éxito:} el completo iguala al D2 (\num{2/20}, Fisher $p=1{,}00$) y no supera al aleatorio ($p=0{,}41$). Las ablaciones son \textbf{no concluyentes}: con 0--2 aciertos, $p\geq0{,}49$.
+\item \textbf{\color{acc!85!black}Seguridad:} 0 muros pisados o saltos (baseline \num{20/20}), por construcción: solo \code{mover()} avanza.
+\item \textbf{\color{warc!85!black}Cuello de botella:} el \num{51\%} de los candidatos es inválido y \num{18/20} corridas terminan por 4 rondas vacías. El Crítico coincide con \code{validar()} en el \num{79\%} (\num{1088/1372}), corrige \num{148} y rechaza \num{801}; \code{mover()} frena \num{34} errores graves. El Árbitro decidió \num{61} veces y cambió el voto en \num{42}.
+\item \textbf{Costo:} 5,5 llamadas por paso; 140 s frente a 29 s del D2 (4,8$\times$).
+\end{itemize}
+\begin{callout}{acc}
+\textbf{\color{acc!80!black}Lectura.} Evita violaciones físicas (por construcción), pero no el cuello de botella: la generación del Navegante. Con $N=20$ no puede atribuirse efecto a ninguna técnica.
+\end{callout}
+
+\section{Caso de fallo: laberinto 1}
+\begin{callout}{bad}
+\textbf{\color{badx}Óptimo de 11 pasos; el sistema da 38 sin llegar.} Oscila sobre todo entre (0,8), (1,8) y (2,8): 26 rondas vacías y 97 de 192 candidatos con coordenada mal declarada. Sin Crítico llega a (6,5) en 11 pasos. \textbf{Hipótesis:} el único candidato válido que llega es el retroceso; la memoria marca, pero no decide el desvío.
+\end{callout}
+
+\section{Repositorio y reproducibilidad}
+Código, prompts, trazas y resultados: \href{https://github.com/Cata-X/GenIA}{\code{github.com/Cata-X/GenIA}}. Demo: \code{python -m src.demo}. Video: \href{https://drive.google.com/file/d/1YE0ZFvhj2wjon41MpgBRfoleRD-NYLg8/view?usp=sharing}{\colorbox{wart}{\texttt{\color{warc}Ver video}}}.
+
+\section{Referencias}
+{\fontsize{6.9}{7.8}\selectfont
+\textcolor{pri}{\bfseries[1]} Wang et al. (2023). Self-Consistency Improves Chain of Thought Reasoning. arXiv:2203.11171.\par
+\textcolor{pri}{\bfseries[2]} Madaan et al. (2023). Self-Refine: Iterative Refinement with Self-Feedback. arXiv:2303.17651.\par}
+\end{multicols}
+\end{document}

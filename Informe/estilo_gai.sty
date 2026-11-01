@@ -1,0 +1,80 @@
+% estilo_gai.sty — estilo común de los entregables de GenAI (1 página, XeLaTeX)
+\ProvidesPackage{estilo_gai}
+\RequirePackage{fontspec}
+\RequirePackage{polyglossia}
+\setmainlanguage{spanish}
+\setmainfont{Latin Modern Roman}[SmallCapsFont={Latin Modern Roman Caps}]
+\setmonofont{Latin Modern Mono}[Scale=0.95]
+\RequirePackage[protrusion=true,expansion=false]{microtype}
+\RequirePackage[table]{xcolor}
+\RequirePackage{multicol,booktabs,enumitem,titlesec,amsmath,amssymb,graphicx}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\RequirePackage[most]{tcolorbox}
+
+% ---------- Paleta: verdes + morado de contraste ----------
+\definecolor{pri}{HTML}{3D5A52}    % estructura: títulos, encabezado de tabla
+\definecolor{acc}{HTML}{5F8F82}    % método propio / solución
+\definecolor{sky}{HTML}{E7F0ED}
+\definecolor{okc}{HTML}{6B9B5A}    % verificador / válido
+\definecolor{okt}{HTML}{E9F2E4}
+\definecolor{badc}{HTML}{8A6FA3}   % fallo / rechazo (morado de contraste)
+\definecolor{badt}{HTML}{EFE9F5}
+\definecolor{warc}{HTML}{8F9A3E}   % limitación / aviso (oliva)
+\definecolor{wart}{HTML}{F2F4E0}
+\definecolor{slate}{HTML}{6E7570}  % baseline / neutro
+\definecolor{slatet}{HTML}{F0F0ED}
+\definecolor{band}{HTML}{F1F5F2}
+\colorlet{badx}{badc!78!black}     % morado para texto (más contraste)
+\colorlet{accc}{acc}\colorlet{acct}{sky}
+\RequirePackage[colorlinks=true,urlcolor=acc,linkcolor=acc,citecolor=acc]{hyperref}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}\setlength{\parskip}{1.5pt}
+\setlength{\columnsep}{0.6cm}\raggedbottom\sloppy
+\emergencystretch=1.5em
+\setlist[itemize]{leftmargin=1.0em,itemsep=0.8pt,topsep=1pt,parsep=0pt,partopsep=0pt,
+  label={\textcolor{acc}{\raisebox{0.6pt}{\tiny$\blacksquare$}}}}
+
+% ---------- Títulos: insignia + versalitas + filete ----------
+\newcommand{\secbadge}[1]{\tikz[baseline=(n.base)]\node[fill=pri,text=white,rounded corners=1.2pt,
+  inner xsep=2.6pt,inner ysep=1.6pt,font=\bfseries\fontsize{6.8}{7}\selectfont](n){#1};}
+\titleformat{\section}{\scshape\color{pri}\fontsize{9.9}{10.8}\selectfont}
+  {\secbadge{\thesection}}{0.45em}{}[{\vspace{-1.4pt}\color{pri!25}\titlerule[0.45pt]}]
+\titlespacing*{\section}{0pt}{3.5pt}{2pt}
+
+% ---------- Utilidades ----------
+\newcommand{\num}[1]{\textbf{\color{pri}#1}}     % cifras clave
+\newcommand{\code}[1]{\colorbox{slatet}{\texttt{\fontsize{6.8}{7}\selectfont #1}}}
+\newtcolorbox{callout}[2][]{enhanced,breakable=false,frame hidden,
+  borderline west={1.7pt}{0pt}{#2c},colback=#2t,
+  boxsep=1pt,left=3pt,right=2.5pt,top=1.2pt,bottom=1.2pt,arc=0pt,
+  before skip=2.5pt,after skip=3.5pt,#1}
+\newcommand{\thc}[1]{\color{white}\bfseries #1}   % encabezado de tabla
+
+% ---------- Banda de encabezado suave + pie ----------
+\newlength{\gaibandh}\setlength{\gaibandh}{2.03cm}
+\newcommand{\gaicurso}{Generative Artificial Intelligence (580694)}
+\newcommand{\gaiheader}[4]{% título, equipo, chip-línea1, chip-línea2
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[band] (current page.north west) rectangle ([yshift=-\gaibandh]current page.north east);
+  \fill[pri]  (current page.north west) rectangle ([yshift=-0.2cm]current page.north east);
+  \draw[pri!35,line width=0.5pt] ([yshift=-\gaibandh]current page.north west) -- ([yshift=-\gaibandh]current page.north east);
+  \node[anchor=north west,text width=14.2cm,align=left,inner sep=0pt]
+     at ([xshift=1.35cm,yshift=-0.45cm]current page.north west)
+     {{\bfseries\fontsize{7.4}{8.4}\selectfont\color{pri}UNIVERSIDAD DE CONCEPCIÓN\hspace{0.5em}$\cdot$\hspace{0.5em}\gaicurso}\\[3pt]
+      {\bfseries\fontsize{12.4}{14}\selectfont\color{black!88}#1}\\[3.5pt]
+      {\fontsize{7.8}{9}\selectfont\color{black!60}Equipo: #2}};
+  \node[anchor=north east,draw=pri,fill=white,text=pri,rounded corners=2pt,line width=0.6pt,
+        inner xsep=6pt,inner ysep=3.5pt,align=center,font=\bfseries\fontsize{7.6}{9}\selectfont]
+     at ([xshift=-1.35cm,yshift=-0.5cm]current page.north east)
+     {#3\\[-1pt]{\fontsize{6.8}{8}\selectfont\mdseries #4}};
+\end{tikzpicture}}
+\newcommand{\gaifooter}[1]{%
+\begin{tikzpicture}[remember picture,overlay]
+  \draw[pri!30,line width=0.4pt] ([xshift=1.35cm,yshift=0.44cm]current page.south west) -- ([xshift=-1.35cm,yshift=0.44cm]current page.south east);
+  \node[anchor=south west,font=\fontsize{6.4}{7}\selectfont\color{black!55}] at ([xshift=1.35cm,yshift=0.14cm]current page.south west)
+     {Grupo 2\hspace{0.6em}$\cdot$\hspace{0.6em}Generative AI 580694\hspace{0.6em}$\cdot$\hspace{0.6em}Universidad de Concepción};
+  \node[anchor=south east,font=\fontsize{6.4}{7}\selectfont\color{black!55}] at ([xshift=-1.35cm,yshift=0.14cm]current page.south east) {#1};
+\end{tikzpicture}}
+\endinput
